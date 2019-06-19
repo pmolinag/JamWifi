@@ -1,0 +1,4 @@
+pip3==9.0.1
+scapy==2.4.2
+wireless==0.3.2
+wifi==0.3.8
