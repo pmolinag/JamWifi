@@ -16,7 +16,7 @@
             halign: 'center'
             valign: 'middle'
             text: "Deauthentication"
-            on_press: root.type("./types/non-selective_jammer.py")
+            on_press: root.select("deauthentication.py")
         Label:
             text: "The attacker sends Deauthentication packets simulating that he is the Access Point to a particular station or to every one."
             color: 0,0,0,1
@@ -29,7 +29,7 @@
             halign: 'center'
             valign: 'middle'
             text: "RTS/CTS NAV timing attack"
-            on_press: root.type("./types/rts_cts_NAV.py")
+            on_press: root.select("rts_cts_NAV.py")
         Label:
             text: "The attacker sends RTS or CTS packets, it depends on what packet you choose, which have modified their Duration field to the maximum. The Access Point will be occupied the full time with a small number of packets per second. "
             color: 0,0,0,1
@@ -42,7 +42,7 @@
             halign: 'center'
             valign: 'middle'
             text: "Selective RTS/CTS NAV timing attack"
-            on_press: root.type("./types/selective_rts_cts_NAV.py")
+            on_press: root.select("selective_rts_cts_NAV.py")
         Label:
             text: "The attacker station listen in the medium. When it detects a RTS packet from the station selected for Jam, It start sending packages which have the Duration field modified to the maximum."
             color: 0,0,0,1
