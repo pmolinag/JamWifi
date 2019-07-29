@@ -31,15 +31,12 @@ class RTS_CTS_NAV():
         try:
             sendp(self.packet, iface = self.monitor_card, count=self.packets, inter=self.inter)
         except KeyboardInterrupt:
-            pass
+            exit()
 
     def PacketHandler(self, pkt) :
         conf.verb=0
-        try:
-            if pkt.haslayer(Dot11FCS) and pkt.type == 1 and pkt.subtype == 11 and pkt.addr2 == self.address:
-                self.jam()
-        except KeyboardInterrupt:
-            pass
+        if pkt.haslayer(Dot11FCS) and pkt.type == 1 and pkt.subtype == 11 and pkt.addr2 == self.address:
+            self.jam()
 
     def sniff(self):
         sniff(iface=self.monitor_card, prn=self.PacketHandler)
