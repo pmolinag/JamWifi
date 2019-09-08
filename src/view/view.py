@@ -10,14 +10,13 @@ def network_scan():
     wifi_card = Wireless()
     interface = wifi_card.interface()
     wifi_collect = Cell.all(interface)
-    print ("Available networks scan in progress ...")
+    print ("Scanning networks... You can stop it pressing ctrl + c.")
     print ("#" * 40)
     time.sleep(0.5)
     for wi in wifi_collect:
         print("SSID: " + wi.ssid)
         print("BSSID: " + wi.address)
         print("Channel: " + str(wi.channel))
-        #print("Quality: " + str(wi.quality))
         print("+-" * 10)
         time.sleep(0.5)
     print ("#" * 40)
@@ -74,27 +73,30 @@ if __name__ == "__main__":
     print("Starting monitor mode on the selected device.")
     print('#' * 40)
     time.sleep(2)
+
     #Start monitor mode on the selected device
     ctl.monitor_mode(monitor_card, channel)
 
     ctl.clear()
+
+    print("Testing your card, wait a moment. You can stop it doing ctrl + c.")
+
+    ctl.injection_test(bssid, monitor_card)
 
     #call airmon-ng to show to the user a list of available network cards on their device
     #subprocess.call('airmon-ng', shell=True)
 
     #monitor_card = input('Enter the name of the network card you wish to use: ')
 
-    #ctl.clear()
-
-    client = 'FF:FF:FF:FF:FF:FF'
+    ctl.clear()
 
     if attack != 'selective RTS/CTS NAV':
 
         time = input('Please enter the time you want to jam the network in minutes. You will be able to stop it pressing crtl + c. ')
 
-        packets = ctl.calcule_paquets(attack, time)
+        packets = ctl.calcule_packets(attack, time)
 
-        if attack == 'Deauthentication':
+        if attack == "Deauthentication":
             try:
                 #call airodump-ng to show stations conected
                 subprocess.call('airodump-ng --bssid {} {}'.format(bssid, monitor_card), shell=True)
@@ -102,6 +104,10 @@ if __name__ == "__main__":
                 pass
 
             client = input('Please enter the station you want to jam. Press enter if you want to jam all stations: ')
+
+            if client == '':
+
+                client = 'FF:FF:FF:FF:FF:FF'
 
         if attack == "RTS/CTS NAV":
             subtype = ""
@@ -114,11 +120,6 @@ if __name__ == "__main__":
     card_mac = ctl.get_mac(monitor_card)
 
     card_mac = card_mac.lower()
-
-    ctl.clear()
-
-    print("Testing your card, wait a moment. You can stop it doing ctrl + c.")
-    ctl.injection_test(bssid, monitor_card)
 
     ctl.clear()
 

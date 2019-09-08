@@ -1,4 +1,3 @@
-import sys, os, subprocess
 from scapy.all import *
 
 class Deauthentication():
@@ -18,4 +17,4 @@ class Deauthentication():
         try:
         	sendp(self.packet, iface = self.card, count=self.packets, inter=0.0001) #Send deauth packet
         except KeyboardInterrupt:
-            pass
+            exit()

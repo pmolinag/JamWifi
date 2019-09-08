@@ -1,5 +1,3 @@
-import sys, os, subprocess
-from subprocess import PIPE
 from scapy.all import *
 
 class RTS_CTS_NAV():
@@ -7,7 +5,7 @@ class RTS_CTS_NAV():
     def __init__(self, address, card_mac, monitor_card, subtype, packets, inter):
         self.address = address
         self.monitor_card = monitor_card
-        self. card_mac = card_mac
+        self.card_mac = card_mac
         self.packets = packets
         self.subtype = subtype
         self.inter = inter
@@ -33,10 +31,10 @@ class RTS_CTS_NAV():
         except KeyboardInterrupt:
             exit()
 
-    def PacketHandler(self, pkt) :
+    def packet_handler(self, pkt) :
         conf.verb=0
         if pkt.haslayer(Dot11FCS) and pkt.type == 1 and pkt.subtype == 11 and pkt.addr2 == self.address:
             self.jam()
 
     def sniff(self):
-        sniff(iface=self.monitor_card, prn=self.PacketHandler)
+        sniff(iface=self.monitor_card, prn=self.packet_handler)

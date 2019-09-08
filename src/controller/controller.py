@@ -16,25 +16,21 @@ class Controller():
 
 
     # Calculate the time to Jam
-    def calcule_paquets(self, attack, time):
+    def calcule_packets(self, attack, time):
 
-        packet = ""
+        packets = ""
+
+        time = int(time)
 
         if attack == "Deauthentication":
 
-            time = int(time)
-
             packets = (60*time)/0.0001
-
-            packets = int(packets)
 
         elif attack == "RTS/CTS NAV":
 
-            time = int(time)
-
             packets = (60*time)/0.03
 
-            packets = int(packets)
+        packets = int(packets)
 
         return packets
 
